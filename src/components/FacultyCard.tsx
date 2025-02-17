@@ -36,9 +36,9 @@ const FacultyCard: React.FC<FacultyCardProps> = ({
             </p>
           )}
         </a>
-        <p className="text-sm text-gray-600">{designation}</p>
+        <p className="text-sm text-gray-600 font-bold">{designation}</p>
         <p className="text-xs text-gray-500">{department}</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-500 line-clamp-1">
           Specializes in <span className="font-medium">{interest}</span>
         </p>
         <p className="text-sm font-medium">

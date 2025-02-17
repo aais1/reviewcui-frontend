@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, setUser } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b bg-gray-100 border-gray-200 px-6 py-3 ">
@@ -29,30 +31,60 @@ const Header = () => {
           </svg>
         </div>
         <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">
-          ReviewCUI
+          <Link to="/">ReviewCUI</Link>
         </h2>
       </div>
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center gap-6 text-gray-700 text-sm">
-        <a href="/" className="hover:text-black hover:font-semibold">
+        <Link to="/" className="hover:text-black hover:font-semibold">
           Home
-        </a>
-        <a href="/search" className="hover:text-black hover:font-semibold">
+        </Link>
+        <Link
+          to={
+            user
+              ? '/search'
+              : '/auth/sign-in?error=You need to be logged in to access this page ☹'
+          }
+          className={`${!user ? 'line-through' : 'hover:text-black'}  `}
+        >
           Search Faculty
-        </a>
-        {/* <a
-          href="/write-review"
+        </Link>
+
+        {user && (
+          <Link to="/profile" className="hover:text-black hover:font-semibold">
+            Profile
+          </Link>
+        )}
+        {/* <Link
+          to="/write-review"
           className="hover:text-black hover:font-semibold"
         >
           Write Review
-        </a> */}
+        </Link> */}
       </nav>
 
       {/* Sign In Button (Desktop) */}
-      <button className="hidden md:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer">
-        <Link to="auth/sign-in">Sign In</Link>
-      </button>
+      {!user ? (
+        <button className="hidden md:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer">
+          <Link to="auth/sign-in">Sign In</Link>
+        </button>
+      ) : (
+        <button
+          className="hidden md:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer"
+          onClick={() => {
+            fetch('http://localhost:3000/auth/logout', {
+              method: 'POST',
+              credentials: 'include',
+            }).then(() => {
+              console.log('logged out');
+              setUser(null);
+            });
+          }}
+        >
+          Logout
+        </button>
+      )}
 
       {/* Mobile Menu Button */}
       <div className="relative z-50 md:hidden">
@@ -65,18 +97,44 @@ const Header = () => {
       {menuOpen && (
         <div className="absolute z-50 top-12 left-0 w-full bg-white border-t border-gray-200 shadow-md md:hidden">
           <nav className="flex flex-col items-start px-8 border py-4 space-y-4 text-gray-700 text-sm">
-            <a href="/" className="hover:text-black">
+            <Link to="/" className="hover:text-black">
               Home
-            </a>
-            <a href="/search" className="hover:text-black ">
+            </Link>
+            <Link
+              to="/search"
+              className={`${!user ? 'line-through' : 'hover:text-black'}  `}
+            >
               Search Faculty
-            </a>
-            {/* <a href="/write-review" className="hover:text-black">
-              Write Review
-            </a> */}
-            <button className="bg-gray-900 text-white w-1/2 mx-auto px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer">
-              <Link to="auth/sign-in">Sign In</Link>
-            </button>
+            </Link>
+            {user && (
+              <Link
+                to="/profile"
+                className="hover:text-black hover:font-semibold"
+              >
+                Profile
+              </Link>
+            )}
+
+            {!user ? (
+              <button className="hidden md:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer">
+                <Link to="auth/sign-in">Sign In</Link>
+              </button>
+            ) : (
+              <button
+                className="w-full bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer"
+                onClick={() => {
+                  fetch('http://localhost:3000/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                  }).then(() => {
+                    console.log('logged out');
+                    setUser(null);
+                  });
+                }}
+              >
+                Logout
+              </button>
+            )}
           </nav>
         </div>
       )}

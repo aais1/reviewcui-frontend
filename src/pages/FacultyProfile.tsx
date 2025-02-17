@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 
 interface Review {
   id: number;
@@ -15,49 +16,52 @@ interface Faculty {
   _id: string;
   name: string;
   profileImage: string;
-  university: string;
-  rating: number;
+  profileLink: string;
+  designation: string;
+  department: string;
+  hecApproved: boolean;
+  interest: string;
   totalReviews: number;
+  rating: string;
   ratingDistribution: Record<number, number>;
   reviews: Review[];
 }
 
-// Dummy Data
-const facultyData: Faculty = {
-  _id: '67ab4c9cdbc12670b814f620',
-  name: 'Dr. John Smith',
-  profileImage: 'https://randomuser.me/api/portraits/men/45.jpg',
-  university: 'Computer Science, University of California, Berkeley',
-  rating: 4.5,
-  totalReviews: 200,
-  ratingDistribution: {
-    5: 69,
-    4: 15,
-    3: 8,
-    2: 3,
-    1: 5,
-  },
-  reviews: [
-    {
-      id: 1,
-      user: 'Samantha',
-      date: 'May 12, 2023',
-      rating: 5,
-      comment:
-        'Dr. Smith is a fantastic professor who is very knowledgeable about the subject matter. He does a great job of explaining complex concepts in a way that is easy to understand. The class has been challenging but also very rewarding.',
-      likes: 2,
-      replies: 0,
-      userImage: 'https://randomuser.me/api/portraits/women/44.jpg',
-    },
-  ],
-};
-
 const FacultyProfile: React.FC = () => {
-  const [search, setSearch] = useState<string>('');
-  const [reviews, setReviews] = useState<Review[]>(facultyData.reviews);
+  const { id } = useParams(); // Get faculty ID from URL
+  const [facultyData, setFacultyData] = useState<Faculty | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [userRating, setUserRating] = useState<number>(0);
   const [reviewText, setReviewText] = useState<string>('');
   const reviewFieldRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch faculty data dynamically by ID
+  useEffect(() => {
+    const fetchFacultyData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `http://localhost:3000/data/faculty?id=${id}`,
+          { credentials: 'include' }
+        );
+        if (!response.ok) throw new Error('Failed to fetch faculty data.');
+
+        const data = await response.json();
+        if (!data || data?.length === 0) throw new Error('Faculty not found.');
+
+        setFacultyData(data[0]); // Assuming API returns an array
+        setReviews(data[0].reviews);
+        setError(null);
+      } catch (error) {
+        setError('Error loading faculty profile. Please try again later.');
+      }
+      setLoading(false);
+    };
+
+    if (id) fetchFacultyData();
+  }, [id]);
 
   // Function to render stars dynamically
   const renderStars = (rating: number) => {
@@ -76,7 +80,7 @@ const FacultyProfile: React.FC = () => {
       );
   };
 
-  // Function to handle rating submission
+  // Function to handle review submission
   const handleSubmitReview = () => {
     if (userRating === 0 || reviewText.trim() === '') {
       alert('Please provide a rating and a review.');
@@ -99,42 +103,49 @@ const FacultyProfile: React.FC = () => {
     setReviewText('');
   };
 
-  return (
-    <div className=" bg-white shadow-md rounded-lg p-6 mt-6">
-      <div className="max-w-3xl  mx-auto">
-        {/* Faculty Info */}
-        <div className="flex items-center gap-4">
-          <img
-            src={facultyData.profileImage}
-            alt={facultyData.name}
-            className="w-20 h-20 rounded-full border"
-          />
-          <div>
-            <h1 className="text-2xl font-semibold">{facultyData.name}</h1>
-            <p className="text-gray-600">{facultyData.university}</p>
-          </div>
-        </div>
+  if (loading) return <p className="text-center py-6">Loading...</p>;
+  if (error) return <p className="text-center text-red-500 py-6">{error}</p>;
 
-        {/* Rating Overview */}
-        <div className="mt-4 flex items-center justify-between">
-          <div>
-            <span className="text-4xl font-bold">
-              {facultyData.rating.toFixed(1)}
-            </span>
-            <div className="flex">
-              {renderStars(Math.round(facultyData.rating))}
+  return (
+    <div className="bg-white shadow-md rounded-lg p-6 mt-6 ">
+      <div className="md:w-[75vw] mx-auto">
+        <div className="flex md:flex-row flex-col w-full justify-between items-start">
+          {/* Faculty Info */}
+          <div className="flex w-full items-start gap-4">
+            <img
+              src={facultyData?.profileImage}
+              alt={facultyData?.name}
+              className="w-24 h-24 rounded-full border"
+            />
+            <div>
+              <h1 className="text-2xl font-semibold">{facultyData?.name}</h1>
+              <p className="text-gray-600">
+                {facultyData?.designation} -{' '}
+                <strong>{facultyData?.department}</strong>
+              </p>
+              <p className="text-sm text-gray-500 md:w-[85%]">
+                Research Interest: {facultyData?.interest}
+              </p>
+              <a
+                href={facultyData?.profileLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 underline text-sm"
+              >
+                View Official Profile
+              </a>
             </div>
-            <p className="text-gray-500">{facultyData.totalReviews} reviews</p>
           </div>
-          <div className="flex flex-col md:flex-row gap-2">
+
+          <div className="flex flex-row md:flex-col md:w-[35%] w-full text-end mt-6 justify-center gap-4 md:mt-0 md:justify-end items-start md:gap-2">
             <button
-              className="border px-3 py-2 rounded-md"
+              className="border px-3 py-2 md:w-full rounded-md"
               title="Come on help junior fellows 😾"
             >
               Rate this professor
             </button>
             <button
-              className="bg-gray-900 cursor-pointer text-white px-4 py-2 rounded-md hover:bg-black"
+              className="bg-gray-900 md:w-full cursor-pointer text-white px-4 py-2 rounded-md hover:bg-black"
               onClick={() => {
                 if (reviewFieldRef.current) {
                   (reviewFieldRef.current as HTMLTextAreaElement).focus();
@@ -149,10 +160,22 @@ const FacultyProfile: React.FC = () => {
             </button>
           </div>
         </div>
+        {/* Rating Overview */}
+        <div className="mt-4 flex items-center justify-between">
+          <div>
+            <span className="text-4xl font-bold">{facultyData?.rating}</span>
+            <div className="flex">
+              {renderStars(
+                Math.round(parseFloat(facultyData?.rating || '0.0'))
+              )}
+            </div>
+            <p className="text-gray-500">{facultyData?.totalReviews} reviews</p>
+          </div>
+        </div>
 
         {/* Rating Breakdown */}
         <div className="mt-4">
-          {Object.keys(facultyData.ratingDistribution)
+          {Object.keys(facultyData?.ratingDistribution || {})
             .reverse()
             .map(star => (
               <div key={star} className="flex items-center gap-2 text-sm">
@@ -160,27 +183,18 @@ const FacultyProfile: React.FC = () => {
                 <div className="w-40 h-2 bg-gray-200 rounded">
                   <div
                     style={{
-                      width: `${facultyData.ratingDistribution[Number(star)]}%`,
+                      width: `${
+                        facultyData?.ratingDistribution[Number(star)]
+                      }%`,
                     }}
                     className="h-2 bg-gray-900 rounded"
                   ></div>
                 </div>
                 <span className="text-gray-500">
-                  {facultyData.ratingDistribution[Number(star)]}%
+                  {facultyData?.ratingDistribution[Number(star)]}%
                 </span>
               </div>
             ))}
-        </div>
-
-        {/* Search Bar */}
-        <div className="mt-4">
-          {/* <input
-          type="text"
-          placeholder="Search in reviews and questions"
-          className="w-full border px-3 py-2 rounded-md text-gray-700"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        /> */}
         </div>
 
         {/* Review Submission */}
@@ -199,16 +213,15 @@ const FacultyProfile: React.FC = () => {
           </div>
           <textarea
             className="w-full mt-2 border rounded p-2 text-sm"
-            title="Leave a badass review here 🙊"
-            rows={3}
             ref={reviewFieldRef}
             placeholder="Write your review here..."
+            rows={3}
             value={reviewText}
             onChange={e => setReviewText(e.target.value)}
           />
           <button
             onClick={handleSubmitReview}
-            className="bg-gray-900 md:w-auto w-full text-white rounded-md px-4 py-2 mt-2 cursor-pointer hover:bg-black"
+            className="bg-gray-900 text-white rounded-md px-4 py-2 mt-2 hover:bg-black"
           >
             Submit Review
           </button>
@@ -235,9 +248,7 @@ const FacultyProfile: React.FC = () => {
               </div>
             ))
           ) : (
-            <p className="text-gray-500 mt-4">
-              No reviews yet. Be the first to review!
-            </p>
+            <p className="text-gray-500 mt-4">No reviews yet.</p>
           )}
         </div>
       </div>

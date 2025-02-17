@@ -14,6 +14,8 @@ import SignUp from './pages/auth/SignUp';
 import Search from './pages/Search';
 import FacultyProfile from './pages/FacultyProfile';
 import VerifyOTP from './pages/auth/verify-otp';
+import { AuthContextProvider } from './contexts/AuthContext';
+import NotFound from './components/ErrorBoundaries/NotFound';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -24,14 +26,15 @@ const router = createBrowserRouter(
       <Route path="/" element={<MainLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/faculty-profile" element={<FacultyProfile />} />
+        <Route path="/faculty-profile/:id" element={<FacultyProfile />} />
       </Route>
+      <Route path="*" element={<NotFound />}></Route>
     </>
   )
 );
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <AuthContextProvider>
     <RouterProvider router={router} />
-  </StrictMode>
+  </AuthContextProvider>
 );
