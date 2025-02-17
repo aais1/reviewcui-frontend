@@ -29,14 +29,14 @@ const SignIn = () => {
             className="w-full px-4 py-3 mt-2 mb-6 border rounded-lg focus:ring focus:ring-blue-300 outline-none"
           />
 
-          <button className="w-full bg-black cursor-pointer text-white py-3 rounded-lg hover:bg-gray-800 transition">
+          <button className="w-full bg-gray-900 hover:bg-black cursor-pointer text-white py-3 rounded-lg  transition">
             Sign In
           </button>
           <div className="h-[1px] my-4 bg-[#d3d3d3]"></div>
           <p>
             New Here?{' '}
             <Link
-              to="auth/sign-up"
+              to="/auth/sign-up"
               className="hover:underline hover:font-semibold"
             >
               Register Here!

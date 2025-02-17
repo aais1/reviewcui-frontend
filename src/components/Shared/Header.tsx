@@ -38,15 +38,15 @@ const Header = () => {
         <a href="/" className="hover:text-black hover:font-semibold">
           Home
         </a>
-        <a href="/faculty" className="hover:text-black hover:font-semibold">
-          Faculty
+        <a href="/search" className="hover:text-black hover:font-semibold">
+          Search Faculty
         </a>
-        <a
+        {/* <a
           href="/write-review"
           className="hover:text-black hover:font-semibold"
         >
           Write Review
-        </a>
+        </a> */}
       </nav>
 
       {/* Sign In Button (Desktop) */}
@@ -68,12 +68,12 @@ const Header = () => {
             <a href="/" className="hover:text-black">
               Home
             </a>
-            <a href="/faculty" className="hover:text-black ">
-              Faculty
+            <a href="/search" className="hover:text-black ">
+              Search Faculty
             </a>
-            <a href="/write-review" className="hover:text-black">
+            {/* <a href="/write-review" className="hover:text-black">
               Write Review
-            </a>
+            </a> */}
             <button className="bg-gray-900 text-white w-1/2 mx-auto px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition cursor-pointer">
               <Link to="auth/sign-in">Sign In</Link>
             </button>
